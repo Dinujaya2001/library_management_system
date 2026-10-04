@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="20.0" style="-fx-padding: 30; -fx-background-color: transparent;" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ManageMemberPageController">
+    <Label text="Manage Members" textFill="#333333">
+        <font><Font name="System Bold" size="26.0" /></font>
+    </Label>
+
+    <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 5);" VBox.vgrow="ALWAYS">
+        <HBox spacing="15.0" alignment="CENTER_LEFT">
+            <TextField fx:id="txtSearch" promptText="Search Members..." prefHeight="35.0" prefWidth="250.0" style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button text="Edit Member" prefHeight="35.0" style="-fx-background-color: #f59e0b; -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand;" />
+            <Button text="Delete Member" prefHeight="35.0" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand;" />
+        </HBox>
+
+        <TableView fx:id="tblMembers" VBox.vgrow="ALWAYS" style="-fx-border-color: #e0e0e0; -fx-border-radius: 6; -fx-background-radius: 6;">
+            <columns>
+                <TableColumn text="Member ID" prefWidth="100" />
+                <TableColumn text="Full Name" prefWidth="180" />
+                <TableColumn text="Email" prefWidth="180" />
+                <TableColumn text="Phone" prefWidth="120" />
+                <TableColumn text="Address" prefWidth="200" />
+            </columns>
+        </TableView>
+    </VBox>
+</VBox>

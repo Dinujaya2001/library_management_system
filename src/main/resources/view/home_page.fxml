@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane fx:id="mainPane" prefHeight="650.0" prefWidth="1050.0" style="-fx-background-color: #f4f7f6; -fx-background-radius: 20; -fx-border-radius: 20;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.HomePageController">
+
+
+    <left>
+        <VBox prefWidth="250.0" style="-fx-background-color: #1e293b; -fx-background-radius: 20 0 0 20;" BorderPane.alignment="CENTER">
+            <children>
+                
+                <Label text="LMS Admin" textFill="#1abfc7">
+                    <font>
+                        <Font name="System Bold" size="28.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="40.0" left="25.0" top="30.0" />
+                    </VBox.margin>
+                </Label>
+
+                <!-- Navigation Buttons -->
+                <Button alignment="BASELINE_LEFT" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: #334155; -fx-text-fill: white; -fx-cursor: hand;" text="   Dashboard" textAlignment="CENTER">
+                    <font><Font name="System Bold" size="15.0" /></font>
+                    <padding><Insets left="30.0" /></padding>
+                </Button>
+
+                <Button alignment="BASELINE_LEFT" onAction="#btnAddBookOnAction" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-cursor: hand;" text="   Add Book Page " textAlignment="CENTER">
+                    <font><Font name="System Bold" size="15.0" /></font>
+                    <padding><Insets left="30.0" /></padding>
+                </Button>
+
+                <Button alignment="BASELINE_LEFT" onAction="#btnManageMembersOnAction" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-cursor: hand;" text="   Manage Members" textAlignment="CENTER">
+                    <font><Font name="System Bold" size="15.0" /></font>
+                    <padding><Insets left="30.0" /></padding>
+                </Button>
+            <Button alignment="BASELINE_LEFT" onAction="#btnIssueBookOnAction" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-cursor: hand;" text="   Issue Book" textAlignment="CENTER">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font>
+               <padding>
+                  <Insets left="30.0" />
+               </padding>
+            </Button>
+            <Button alignment="BASELINE_LEFT" onAction="#btnReturnBookOnAction" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-cursor: hand;" text="   Return Book" textAlignment="CENTER">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font>
+               <padding>
+                  <Insets left="30.0" />
+               </padding>
+            </Button>
+            <Button alignment="BASELINE_LEFT" onAction="#btnHistoryBookOnAction" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-cursor: hand;" text="   History Page">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font>
+               <padding>
+                  <Insets left="30.0" />
+               </padding>
+            </Button>
+
+
+                <Region VBox.vgrow="ALWAYS" />
+
+
+                <Button alignment="BASELINE_LEFT" prefHeight="55.0" prefWidth="250.0" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 0 0 0 20;" text="   Logout">
+                    <font><Font name="System Bold" size="15.0" /></font>
+                    <padding><Insets left="30.0" /></padding>
+                </Button>
+            </children>
+        </VBox>
+    </left>
+
+    <!-- MAIN CONTENT AREA -->
+    <center>
+        <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+            <children>
+                <!-- Header Title -->
+                <Label text="Dashboard Overview" textFill="#333333">
+                    <font>
+                        <Font name="System Bold" size="26.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="30.0" />
+                    </VBox.margin>
+                </Label>
+
+                <!-- Cards Container -->
+                <HBox spacing="20.0">
+                    <children>
+
+
+                        <VBox alignment="CENTER" prefHeight="130.0" prefWidth="180.0" style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 5);" HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label text="Total Books" textFill="#64748b">
+                                    <font><Font name="System Bold" size="14.0" /></font>
+                                </Label>
+                                <Label text="1,245" textFill="#1abfc7">
+                                    <font><Font name="System Bold" size="36.0" /></font>
+                                    <VBox.margin><Insets top="10.0" /></VBox.margin>
+                                </Label>
+                            </children>
+                        </VBox>
+
+
+                        <VBox alignment="CENTER" prefHeight="130.0" prefWidth="180.0" style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 5);" HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label text="Total Members" textFill="#64748b">
+                                    <font><Font name="System Bold" size="14.0" /></font>
+                                </Label>
+                                <Label text="340" textFill="#3b82f6">
+                                    <font><Font name="System Bold" size="36.0" /></font>
+                                    <VBox.margin><Insets top="10.0" /></VBox.margin>
+                                </Label>
+                            </children>
+                        </VBox>
+
+
+                        <VBox alignment="CENTER" prefHeight="130.0" prefWidth="180.0" style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 5);" HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label text="Borrowed Books" textFill="#64748b">
+                                    <font><Font name="System Bold" size="14.0" /></font>
+                                </Label>
+                                <Label text="128" textFill="#f59e0b">
+                                    <font><Font name="System Bold" size="36.0" /></font>
+                                    <VBox.margin><Insets top="10.0" /></VBox.margin>
+                                </Label>
+                            </children>
+                        </VBox>
+
+
+                        <VBox alignment="CENTER" prefHeight="130.0" prefWidth="180.0" style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 5);" HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label text="Overdue Books" textFill="#64748b">
+                                    <font><Font name="System Bold" size="14.0" /></font>
+                                </Label>
+                                <Label text="12" textFill="#ef4444">
+                                    <font><Font name="System Bold" size="36.0" /></font>
+                                    <VBox.margin><Insets top="10.0" /></VBox.margin>
+                                </Label>
+                            </children>
+                        </VBox>
+
+                    </children>
+                </HBox>
+
+
+
+            </children>
+            <padding>
+                <Insets bottom="30.0" left="40.0" right="40.0" top="30.0" />
+            </padding>
+        </VBox>
+    </center>
+</BorderPane>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="20.0" style="-fx-padding: 30; -fx-background-color: transparent;" xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.IssuBookPageController">
+    <Label text="Issue Book" textFill="#333333">
+        <font><Font name="System Bold" size="26.0" /></font>
+    </Label>
+
+    <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 30; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 5);" maxWidth="600">
+        <VBox spacing="5">
+            <Label text="Select Member" textFill="#4a4a4a"><font><Font name="System Bold" size="13.0" /></font></Label>
+            <ComboBox fx:id="cmbMember" prefHeight="40.0" maxWidth="Infinity" style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" promptText="Search/Select Member" />
+        </VBox>
+
+        <VBox spacing="5">
+            <Label text="Select Book" textFill="#4a4a4a"><font><Font name="System Bold" size="13.0" /></font></Label>
+            <ComboBox fx:id="cmbBook" prefHeight="40.0" maxWidth="Infinity" style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" promptText="Search/Select Book" />
+        </VBox>
+
+        <HBox spacing="20">
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Issue Date" textFill="#4a4a4a"><font><Font name="System Bold" size="13.0" /></font></Label>
+                <DatePicker fx:id="dpIssueDate" prefHeight="40.0" maxWidth="Infinity" style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" />
+            </VBox>
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Due Date" textFill="#4a4a4a"><font><Font name="System Bold" size="13.0" /></font></Label>
+                <DatePicker fx:id="dpDueDate" prefHeight="40.0" maxWidth="Infinity" style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" />
+            </VBox>
+        </HBox>
+
+        <Button text="Issue Book" prefHeight="45.0" maxWidth="Infinity" style="-fx-background-color: #1abfc7; -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand; -fx-margin-top: 20;">
+            <font><Font name="System Bold" size="15.0" /></font>
+            <VBox.margin><Insets top="15.0" /></VBox.margin>
+        </Button>
+    </VBox>
+</VBox>

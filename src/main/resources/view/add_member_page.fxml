@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="20.0" style="-fx-padding: 30; -fx-background-color: transparent;" xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.AddMemberPageController">
+    <Label text="Register New Member" textFill="#333333">
+        <font><Font name="System Bold" size="26.0" /></font>
+    </Label>
+
+    <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 30; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 5);">
+        <GridPane hgap="20.0" vgap="15.0">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="50" />
+                <ColumnConstraints percentWidth="50" />
+            </columnConstraints>
+
+            <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                <Label text="Member ID" textFill="#4a4a4a"><font><Font name="System Bold" size="13.0" /></font></Label>
+                <TextField fx:id="txtMemberId" prefHeight="40.0" style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" />
+            </VBox>
+
+            <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                <Label text="Full Name" textFill="#4a4a4a"><font><Font name="System Bold" size="13.0" /></font></Label>
+                <TextField fx:id="txtName" prefHeight="40.0" style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" />
+            </VBox>
+
+            <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                <Label text="Email" textFill="#4a4a4a"><font><Font name="System Bold" size="13.0" /></font></Label>
+                <TextField fx:id="txtEmail" prefHeight="40.0" style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" />
+            </VBox>
+
+            <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                <Label text="Phone Number" textFill="#4a4a4a"><font><Font name="System Bold" size="13.0" /></font></Label>
+                <TextField fx:id="txtPhone" prefHeight="40.0" style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" />
+            </VBox>
+
+            <VBox spacing="5" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="2">
+                <Label text="Address" textFill="#4a4a4a"><font><Font name="System Bold" size="13.0" /></font></Label>
+                <TextField fx:id="txtAddress" prefHeight="40.0" style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" />
+            </VBox>
+        </GridPane>
+
+        <HBox alignment="CENTER_RIGHT">
+            <VBox.margin><Insets top="20.0" /></VBox.margin>
+            <Button text="Register Member" prefHeight="40.0" prefWidth="180.0" style="-fx-background-color: #1abfc7; -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand;"><font><Font name="System Bold" size="14.0" /></font></Button>
+        </HBox>
+    </VBox>
+</VBox>

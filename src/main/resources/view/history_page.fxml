@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="20.0" style="-fx-padding: 30; -fx-background-color: transparent;" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.HistoryPageController">
+    <Label text="Borrowing History" textFill="#333333">
+        <font><Font name="System Bold" size="26.0" /></font>
+    </Label>
+
+    <VBox style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 5);" VBox.vgrow="ALWAYS">
+        <TableView fx:id="tblHistory" VBox.vgrow="ALWAYS" style="-fx-border-color: #e0e0e0; -fx-border-radius: 6; -fx-background-radius: 6;">
+            <columns>
+                <TableColumn text="Member ID" prefWidth="120" />
+                <TableColumn text="Book Title" prefWidth="250" />
+                <TableColumn text="Issue Date" prefWidth="120" />
+                <TableColumn text="Due Date" prefWidth="120" />
+                <TableColumn text="Return Date" prefWidth="120" />
+                <TableColumn text="Status" prefWidth="120" />
+            </columns>
+        </TableView>
+    </VBox>
+</VBox>
