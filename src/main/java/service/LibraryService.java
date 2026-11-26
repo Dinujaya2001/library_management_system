@@ -9,27 +9,55 @@ import repository.MemberRepository;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class LibraryService {
+
+    private static final String FILTER_ALL = "All";
+
     private final BookRepository bookRepository = new BookRepository();
     private final MemberRepository memberRepository = new MemberRepository();
     private final BorrowRepository borrowRepository = new BorrowRepository();
 
-    public boolean authenticate(String username, String password) {
-        return "admin".equals(username.trim()) && "1234".equals(password);
+    public int getTotalBooks() throws SQLException {
+        return bookRepository.getTotalBooksCount();
+    }
+
+    public int getTotalMembers() throws SQLException {
+        return memberRepository.getTotalMembersCount();
+    }
+
+    public int getCurrentlyBorrowedCount() throws SQLException {
+        return borrowRepository.getCurrentlyBorrowedCount();
+    }
+
+    public int getOverdueCount() throws SQLException {
+        return borrowRepository.getOverdueCount(LocalDate.now(ZoneId.systemDefault()));
     }
 
     public void addBook(Book book) throws SQLException {
-        if (book.getQuantity() <= 0) {
-            throw new IllegalArgumentException("Quantity must be greater than 0.");
+        if (book == null) {
+            throw new IllegalArgumentException("Book details cannot be null.");
         }
-        book.setAvailableQuantity(book.getQuantity());
         bookRepository.save(book);
     }
 
+    public Book findBookByCode(String bookCode) throws SQLException {
+        return bookRepository.findByCode(bookCode);
+    }
+
     public void addMember(Member member) throws SQLException {
+        if (member == null) {
+            throw new IllegalArgumentException("Member details cannot be null.");
+        }
         memberRepository.save(member);
+    }
+
+    public Member findMemberByCode(String memberCode) throws SQLException {
+        return memberRepository.findByCode(memberCode);
     }
 
     public List<Member> getAllMembers() throws SQLException {
@@ -44,6 +72,9 @@ public class LibraryService {
     }
 
     public void updateMember(Member member) throws SQLException {
+        if (member == null) {
+            throw new IllegalArgumentException("Member details cannot be null.");
+        }
         memberRepository.update(member);
     }
 
@@ -51,64 +82,76 @@ public class LibraryService {
         memberRepository.deleteByCode(memberCode);
     }
 
-    public List<Member> getMembersForDropdown() throws SQLException {
-        return memberRepository.findAll();
-    }
-
-    public List<Book> getAvailableBooksForDropdown() throws SQLException {
-        return bookRepository.findAvailableBooks();
-    }
-
-    public void issueBook(Member member, Book book, LocalDate issueDate, LocalDate dueDate) throws SQLException {
-        if (dueDate.isBefore(issueDate)) {
-            throw new IllegalArgumentException("Due date cannot be before issue date.");
-        }
-        boolean decremented = bookRepository.updateAvailableQuantity(book.getBookCode(), -1);
-        if (!decremented) {
-            throw new IllegalStateException("No copies available for this book.");
+    public void issueBook(String memberCode, String bookCode, LocalDate issueDate, LocalDate dueDate)
+            throws SQLException {
+        Member member = memberRepository.findByCode(memberCode);
+        if (member == null) {
+            throw new IllegalArgumentException("Member not found with ID: " + memberCode);
         }
 
-        BorrowRecord borrowRecord = new BorrowRecord();
-        borrowRecord.setMemberCode(member.getMemberCode());
-        borrowRecord.setMemberName(member.getFullName());
-        borrowRecord.setBookCode(book.getBookCode());
-        borrowRecord.setBookTitle(book.getTitle());
-        borrowRecord.setIssueDate(issueDate);
-        borrowRecord.setDueDate(dueDate);
-        borrowRepository.saveIssue(borrowRecord);
-    }
-
-    public List<BorrowRecord> getActiveBorrowedRecords() throws SQLException {
-        return borrowRepository.findActiveBorrowedRecords();
-    }
-
-    public String returnBook(BorrowRecord borrowRecord, LocalDate returnDate) throws SQLException {
-        if (returnDate.isBefore(borrowRecord.getIssueDate())) {
-            throw new IllegalArgumentException("Return date cannot be before issue date.");
+        Book book = bookRepository.findByCode(bookCode);
+        if (book == null) {
+            throw new IllegalArgumentException("Book not found with ID: " + bookCode);
         }
-        String finalStatus = returnDate.isAfter(borrowRecord.getDueDate()) ? "Overdue" : "Returned";
-        borrowRepository.markReturned(borrowRecord.getId(), returnDate, finalStatus);
-        bookRepository.updateAvailableQuantity(borrowRecord.getBookCode(), 1);
-        return finalStatus;
+
+        if (book.getAvailableQuantity() <= 0) {
+            throw new IllegalStateException("No copies available for book: " + book.getTitle());
+        }
+
+        borrowRepository.issueBook(memberCode, bookCode, issueDate, dueDate);
+        bookRepository.decrementAvailableQuantity(bookCode);
     }
 
-    public List<BorrowRecord> getBorrowingHistory() throws SQLException {
-        return borrowRepository.findAllHistory();
+    public List<BorrowRecord> getActiveBorrowRecords() throws SQLException {
+        return borrowRepository.findActiveRecords();
     }
 
-    public int getTotalBooks() throws SQLException {
-        return bookRepository.getTotalBookCount();
+    public List<BorrowRecord> searchActiveBorrowRecords(String keyword) throws SQLException {
+        if (keyword == null || keyword.isBlank()) {
+            return borrowRepository.findActiveRecords();
+        }
+        return borrowRepository.searchActiveRecords(keyword.trim());
     }
 
-    public int getTotalMembers() throws SQLException {
-        return memberRepository.getTotalMemberCount();
+    public void returnBook(int recordId, LocalDate returnDate) throws SQLException {
+        BorrowRecord borrowRecord = borrowRepository.findById(recordId);
+        if (borrowRecord == null) {
+            throw new IllegalArgumentException("Borrow record not found with ID: " + recordId);
+        }
+        if ("RETURNED".equalsIgnoreCase(borrowRecord.getStatus())) {
+            throw new IllegalStateException("This book has already been returned.");
+        }
+
+        borrowRepository.markAsReturned(recordId, returnDate);
+        bookRepository.incrementAvailableQuantity(borrowRecord.getBookCode());
     }
 
-    public int getCurrentlyBorrowedCount() throws SQLException {
-        return borrowRepository.countCurrentlyBorrowed();
+    public List<BorrowRecord> getBorrowHistory(String status, String keyword) throws SQLException {
+        List<BorrowRecord> allRecords = borrowRepository.findAllHistory();
+        String normalizedStatus = (status == null || status.isBlank()) ? FILTER_ALL : status.trim();
+        String normalizedKeyword = (keyword == null) ? "" : keyword.trim().toLowerCase(Locale.ROOT);
+
+        List<BorrowRecord> filtered = new ArrayList<>();
+        for (BorrowRecord borrowRecord : allRecords) {
+            boolean matchesStatus = FILTER_ALL.equalsIgnoreCase(normalizedStatus)
+                    || (borrowRecord.getStatus() != null && borrowRecord.getStatus().equalsIgnoreCase(normalizedStatus));
+
+            boolean matchesKeyword = normalizedKeyword.isEmpty()
+                    || String.valueOf(borrowRecord.getId()).contains(normalizedKeyword)
+                    || containsIgnoreCase(borrowRecord.getMemberCode(), normalizedKeyword)
+                    || containsIgnoreCase(borrowRecord.getMemberName(), normalizedKeyword)
+                    || containsIgnoreCase(borrowRecord.getBookCode(), normalizedKeyword)
+                    || containsIgnoreCase(borrowRecord.getBookTitle(), normalizedKeyword)
+                    || containsIgnoreCase(borrowRecord.getStatus(), normalizedKeyword);
+
+            if (matchesStatus && matchesKeyword) {
+                filtered.add(borrowRecord);
+            }
+        }
+        return filtered;
     }
 
-    public int getOverdueCount() throws SQLException {
-        return borrowRepository.countOverdue();
+    private boolean containsIgnoreCase(String value, String lowerKeyword) {
+        return value != null && value.toLowerCase(Locale.ROOT).contains(lowerKeyword);
     }
 }

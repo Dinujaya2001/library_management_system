@@ -3,104 +3,132 @@ package repository;
 import config.DatabaseConnection;
 import model.BorrowRecord;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BorrowRepository {
 
-    public boolean saveIssue(BorrowRecord record) throws SQLException {
-        String sql = "INSERT INTO borrow_records (member_code, member_name, book_code, book_title, issue_date, due_date, status) VALUES (?, ?, ?, ?, ?, ?, 'Borrowed')";
+    private static final String BASE_BORROW_SELECT =
+            "SELECT br.id, br.member_code, m.full_name AS member_name, br.book_code, b.title AS book_title, " +
+                    "br.issue_date, br.due_date, br.return_date, br.status " +
+                    "FROM borrow_records br " +
+                    "LEFT JOIN members m ON br.member_code = m.member_code " +
+                    "LEFT JOIN books b ON br.book_code = b.book_code ";
+
+    public int getCurrentlyBorrowedCount() throws SQLException {
+        String sql = "SELECT COUNT(*) AS total FROM borrow_records WHERE status IN ('ISSUED', 'OVERDUE')";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, record.getMemberCode());
-            stmt.setString(2, record.getMemberName());
-            stmt.setString(3, record.getBookCode());
-            stmt.setString(4, record.getBookTitle());
-            stmt.setDate(5, Date.valueOf(record.getIssueDate()));
-            stmt.setDate(6, Date.valueOf(record.getDueDate()));
-            return stmt.executeUpdate() > 0;
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            return rs.next() ? rs.getInt("total") : 0;
         }
     }
 
-    public List<BorrowRecord> findActiveBorrowedRecords() throws SQLException {
-        List<BorrowRecord> list = new ArrayList<>();
-        String sql = "SELECT * FROM borrow_records WHERE status IN ('Borrowed', 'Overdue') ORDER BY due_date ASC";
+    public int getOverdueCount(LocalDate today) throws SQLException {
+        String sql = "SELECT COUNT(*) AS total FROM borrow_records WHERE return_date IS NULL AND due_date < ?";
         try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                list.add(mapRow(rs));
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setObject(1, today);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? rs.getInt("total") : 0;
             }
         }
-        return list;
     }
 
-    public boolean markReturned(int recordId, LocalDate returnDate, String status) throws SQLException {
-        String sql = "UPDATE borrow_records SET return_date = ?, status = ? WHERE id = ?";
+    public void issueBook(String memberCode, String bookCode, LocalDate issueDate, LocalDate dueDate)
+            throws SQLException {
+        String sql = "INSERT INTO borrow_records (member_code, book_code, issue_date, due_date, status) VALUES (?, ?, ?, ?, 'ISSUED')";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setDate(1, Date.valueOf(returnDate));
-            stmt.setString(2, status);
-            stmt.setInt(3, recordId);
-            return stmt.executeUpdate() > 0;
+            stmt.setString(1, memberCode);
+            stmt.setString(2, bookCode);
+            stmt.setObject(3, issueDate);
+            stmt.setObject(4, dueDate);
+            stmt.executeUpdate();
+        }
+    }
+
+    public BorrowRecord findById(int recordId) throws SQLException {
+        String sql = BASE_BORROW_SELECT + "WHERE br.id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, recordId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
+            }
+        }
+        return null;
+    }
+
+    public List<BorrowRecord> findActiveRecords() throws SQLException {
+        return executeRecordQuery(BASE_BORROW_SELECT + "WHERE br.return_date IS NULL ORDER BY br.due_date ASC");
+    }
+
+    public List<BorrowRecord> searchActiveRecords(String keyword) throws SQLException {
+        String sql = BASE_BORROW_SELECT +
+                "WHERE br.return_date IS NULL AND (CAST(br.id AS CHAR) LIKE ? OR LOWER(br.member_code) LIKE ? " +
+                "OR LOWER(br.book_code) LIKE ? OR LOWER(COALESCE(m.full_name, '')) LIKE ? OR LOWER(COALESCE(b.title, '')) LIKE ?) " +
+                "ORDER BY br.due_date ASC";
+        String pattern = "%" + keyword.toLowerCase() + "%";
+        List<BorrowRecord> records = new ArrayList<>();
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            for (int i = 1; i <= 5; i++) {
+                stmt.setString(i, pattern);
+            }
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    records.add(mapRow(rs));
+                }
+            }
+        }
+        return records;
+    }
+
+    public void markAsReturned(int recordId, LocalDate returnDate) throws SQLException {
+        String sql = "UPDATE borrow_records SET return_date = ?, status = 'RETURNED' WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setObject(1, returnDate);
+            stmt.setInt(2, recordId);
+            stmt.executeUpdate();
         }
     }
 
     public List<BorrowRecord> findAllHistory() throws SQLException {
-        List<BorrowRecord> list = new ArrayList<>();
-        String sql = "SELECT * FROM borrow_records ORDER BY id DESC";
+        return executeRecordQuery(BASE_BORROW_SELECT + "ORDER BY br.issue_date DESC, br.id DESC");
+    }
+
+    private List<BorrowRecord> executeRecordQuery(String sql) throws SQLException {
+        List<BorrowRecord> records = new ArrayList<>();
         try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
-                list.add(mapRow(rs));
+                records.add(mapRow(rs));
             }
         }
-        return list;
-    }
-
-    public int countCurrentlyBorrowed() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM borrow_records WHERE return_date IS NULL";
-        try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            return rs.next() ? rs.getInt(1) : 0;
-        }
-    }
-
-    public int countOverdue() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM borrow_records WHERE return_date IS NULL AND due_date < CURDATE()";
-        try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            return rs.next() ? rs.getInt(1) : 0;
-        }
+        return records;
     }
 
     private BorrowRecord mapRow(ResultSet rs) throws SQLException {
-        BorrowRecord record = new BorrowRecord();
-        record.setId(rs.getInt("id"));
-        record.setMemberCode(rs.getString("member_code"));
-        record.setMemberName(rs.getString("member_name"));
-        record.setBookCode(rs.getString("book_code"));
-        record.setBookTitle(rs.getString("book_title"));
-
-        Date issue = rs.getDate("issue_date");
-        Date due = rs.getDate("due_date");
-        Date ret = rs.getDate("return_date");
-
-        record.setIssueDate(issue != null ? issue.toLocalDate() : null);
-        record.setDueDate(due != null ? due.toLocalDate() : null);
-        record.setReturnDate(ret != null ? ret.toLocalDate() : null);
-
-        String dbStatus = rs.getString("status");
-        if (record.getReturnDate() == null && record.getDueDate() != null && LocalDate.now().isAfter(record.getDueDate())) {
-            record.setStatus("Overdue");
-        } else {
-            record.setStatus(dbStatus);
-        }
-        return record;
+        BorrowRecord borrowRecord = new BorrowRecord();
+        borrowRecord.setId(rs.getInt("id"));
+        borrowRecord.setMemberCode(rs.getString("member_code"));
+        borrowRecord.setMemberName(rs.getString("member_name"));
+        borrowRecord.setBookCode(rs.getString("book_code"));
+        borrowRecord.setBookTitle(rs.getString("book_title"));
+        borrowRecord.setIssueDate(rs.getObject("issue_date", LocalDate.class));
+        borrowRecord.setDueDate(rs.getObject("due_date", LocalDate.class));
+        borrowRecord.setReturnDate(rs.getObject("return_date", LocalDate.class));
+        borrowRecord.setStatus(rs.getString("status"));
+        return borrowRecord;
     }
 }

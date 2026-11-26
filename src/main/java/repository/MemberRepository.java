@@ -3,13 +3,25 @@ package repository;
 import config.DatabaseConnection;
 import model.Member;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MemberRepository {
 
-    public boolean save(Member member) throws SQLException {
+    public int getTotalMembersCount() throws SQLException {
+        String sql = "SELECT COUNT(*) AS total FROM members";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            return rs.next() ? rs.getInt("total") : 0;
+        }
+    }
+
+    public void save(Member member) throws SQLException {
         String sql = "INSERT INTO members (member_code, full_name, email, phone, address) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -18,16 +30,30 @@ public class MemberRepository {
             stmt.setString(3, member.getEmail());
             stmt.setString(4, member.getPhone());
             stmt.setString(5, member.getAddress());
-            return stmt.executeUpdate() > 0;
+            stmt.executeUpdate();
         }
     }
 
-    public List<Member> findAll() throws SQLException {
-        List<Member> members = new ArrayList<>();
-        String sql = "SELECT * FROM members ORDER BY id DESC";
+    public Member findByCode(String memberCode) throws SQLException {
+        String sql = "SELECT member_code, full_name, email, phone, address FROM members WHERE member_code = ?";
         try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, memberCode);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
+            }
+        }
+        return null;
+    }
+
+    public List<Member> findAll() throws SQLException {
+        String sql = "SELECT member_code, full_name, email, phone, address FROM members ORDER BY full_name ASC";
+        List<Member> members = new ArrayList<>();
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 members.add(mapRow(rs));
             }
@@ -36,15 +62,14 @@ public class MemberRepository {
     }
 
     public List<Member> search(String keyword) throws SQLException {
-        List<Member> members = new ArrayList<>();
-        String sql = "SELECT * FROM members WHERE LOWER(member_code) LIKE ? OR LOWER(full_name) LIKE ? OR LOWER(email) LIKE ? OR phone LIKE ?";
+        String sql = "SELECT member_code, full_name, email, phone, address FROM members WHERE LOWER(member_code) LIKE ? OR LOWER(full_name) LIKE ? OR LOWER(email) LIKE ? ORDER BY full_name ASC";
         String pattern = "%" + keyword.toLowerCase() + "%";
+        List<Member> members = new ArrayList<>();
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, pattern);
             stmt.setString(2, pattern);
             stmt.setString(3, pattern);
-            stmt.setString(4, pattern);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     members.add(mapRow(rs));
@@ -54,7 +79,7 @@ public class MemberRepository {
         return members;
     }
 
-    public boolean update(Member member) throws SQLException {
+    public void update(Member member) throws SQLException {
         String sql = "UPDATE members SET full_name = ?, email = ?, phone = ?, address = ? WHERE member_code = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -63,36 +88,26 @@ public class MemberRepository {
             stmt.setString(3, member.getPhone());
             stmt.setString(4, member.getAddress());
             stmt.setString(5, member.getMemberCode());
-            return stmt.executeUpdate() > 0;
+            stmt.executeUpdate();
         }
     }
 
-    public boolean deleteByCode(String memberCode) throws SQLException {
+    public void deleteByCode(String memberCode) throws SQLException {
         String sql = "DELETE FROM members WHERE member_code = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, memberCode);
-            return stmt.executeUpdate() > 0;
-        }
-    }
-
-    public int getTotalMemberCount() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM members";
-        try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            return rs.next() ? rs.getInt(1) : 0;
+            stmt.executeUpdate();
         }
     }
 
     private Member mapRow(ResultSet rs) throws SQLException {
-        Member member = new Member();
-        member.setId(rs.getInt("id"));
-        member.setMemberCode(rs.getString("member_code"));
-        member.setFullName(rs.getString("full_name"));
-        member.setEmail(rs.getString("email"));
-        member.setPhone(rs.getString("phone"));
-        member.setAddress(rs.getString("address"));
-        return member;
+        return new Member(
+                rs.getString("member_code"),
+                rs.getString("full_name"),
+                rs.getString("email"),
+                rs.getString("phone"),
+                rs.getString("address")
+        );
     }
 }
