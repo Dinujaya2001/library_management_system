@@ -30,8 +30,16 @@
                     <font><Font name="System Bold" size="15.0" /></font>
                     <padding><Insets left="30.0" /></padding>
                 </Button>
+            <Button alignment="BASELINE_LEFT" onAction="#btnAddBookOnAction" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-cursor: hand;" text="   Add Book Page " textAlignment="CENTER">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font>
+               <padding>
+                  <Insets left="30.0" />
+               </padding>
+            </Button>
 
-                <Button alignment="BASELINE_LEFT" onAction="#btnAddBookOnAction" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-cursor: hand;" text="   Add Book Page " textAlignment="CENTER">
+                <Button alignment="BASELINE_LEFT" onAction="#btnAddMemberOnAction" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-cursor: hand;" text="   Add Member Page " textAlignment="CENTER">
                     <font><Font name="System Bold" size="15.0" /></font>
                     <padding><Insets left="30.0" /></padding>
                 </Button>

@@ -23,6 +23,10 @@ public class HomePageController {
     void btnAddBookOnAction(ActionEvent event) {
         loadPage("add_book_page");
     }
+    @FXML
+    void btnAddMemberOnAction(ActionEvent event) {
+        loadPage("add_member_page");
+    }
 
     @FXML
     void btnHistoryBookOnAction(ActionEvent event) {
