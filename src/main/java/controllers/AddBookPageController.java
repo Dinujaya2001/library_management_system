@@ -13,6 +13,7 @@ import java.time.ZoneId;
 public class AddBookPageController {
 
     private static final String VALIDATION_ERROR = "Validation Error";
+    private static final int MIN_PUBLISHED_YEAR = 1450;
 
     private final LibraryService libraryService = new LibraryService();
 
@@ -51,57 +52,73 @@ public class AddBookPageController {
 
     @FXML
     void btnAddBookOnAction() {
-        String bookCode = txtBookId != null && txtBookId.getText() != null ? txtBookId.getText().trim() : "";
-        String title = txtBookTitle != null && txtBookTitle.getText() != null ? txtBookTitle.getText().trim() : "";
-        String author = txtAuthor != null && txtAuthor.getText() != null ? txtAuthor.getText().trim() : "";
-        String category = cmbCategory != null ? cmbCategory.getValue() : "";
-        String yearText = txtPublishedYear != null && txtPublishedYear.getText() != null ? txtPublishedYear.getText().trim() : "";
-        String quantityText = txtQuantity != null && txtQuantity.getText() != null ? txtQuantity.getText().trim() : "";
+        String bookCode = getTrimmedText(txtBookId);
+        String title = getTrimmedText(txtBookTitle);
+        String author = getTrimmedText(txtAuthor);
+        String category = cmbCategory != null && cmbCategory.getValue() != null ? cmbCategory.getValue().trim() : "";
+        String yearText = getTrimmedText(txtPublishedYear);
+        String quantityText = getTrimmedText(txtQuantity);
 
         if (bookCode.isEmpty() || title.isEmpty() || author.isEmpty()
-                || category == null || category.isBlank()
-                || yearText.isEmpty() || quantityText.isEmpty()) {
-            AlertHelper.showWarning(VALIDATION_ERROR, "Please fill in all required book details.");
+                || category.isEmpty() || yearText.isEmpty() || quantityText.isEmpty()) {
+            AlertHelper.showWarning(VALIDATION_ERROR, "All book fields are required.");
             return;
         }
 
-        int publishedYear;
-        int quantity;
-        int currentYear = Year.now(ZoneId.systemDefault()).getValue();
+        int publishedYear = parsePublishedYear(yearText);
+        if (publishedYear < 0) {
+            return;
+        }
+
+        int quantity = parsePositiveQuantity(quantityText);
+        if (quantity < 0) {
+            return;
+        }
 
         try {
-            publishedYear = Integer.parseInt(yearText);
-            if (publishedYear < 1000 || publishedYear > currentYear) {
-                AlertHelper.showWarning(VALIDATION_ERROR,
-                        "Please enter a valid published year between 1000 and " + currentYear + ".");
+            if (libraryService.findBookByCode(bookCode) != null) {
+                AlertHelper.showWarning(VALIDATION_ERROR, "A book with ID '" + bookCode + "' already exists.");
                 return;
             }
-        } catch (NumberFormatException e) {
-            AlertHelper.showWarning(VALIDATION_ERROR, "Published year must be a valid number.");
-            return;
-        }
 
-        try {
-            quantity = Integer.parseInt(quantityText);
-            if (quantity <= 0) {
-                AlertHelper.showWarning(VALIDATION_ERROR, "Quantity must be greater than 0.");
-                return;
-            }
-        } catch (NumberFormatException e) {
-            AlertHelper.showWarning(VALIDATION_ERROR, "Quantity must be a valid whole number.");
-            return;
-        }
-
-        Book book = new Book(bookCode, title, author, category.trim(), publishedYear, quantity);
-
-        try {
+            Book book = new Book(bookCode, title, author, category, publishedYear, quantity);
             libraryService.addBook(book);
-            AlertHelper.showInfo("Success", "Book added successfully.");
+            AlertHelper.showInfo("Success", "Book '" + title + "' added successfully.");
             clearFields();
         } catch (IllegalArgumentException e) {
             AlertHelper.showWarning(VALIDATION_ERROR, e.getMessage());
         } catch (SQLException e) {
-            AlertHelper.showError("Database Error", "Failed to save book: " + e.getMessage());
+            AlertHelper.showError("Database Error", "Unable to save book: " + e.getMessage());
+        }
+    }
+
+    private int parsePublishedYear(String yearText) {
+        int currentYear = Year.now(ZoneId.systemDefault()).getValue();
+        try {
+            int year = Integer.parseInt(yearText);
+            if (year < MIN_PUBLISHED_YEAR || year > currentYear) {
+                AlertHelper.showWarning(VALIDATION_ERROR,
+                        "Published year must be between " + MIN_PUBLISHED_YEAR + " and " + currentYear + ".");
+                return -1;
+            }
+            return year;
+        } catch (NumberFormatException e) {
+            AlertHelper.showWarning(VALIDATION_ERROR, "Published year must be a valid four-digit number.");
+            return -1;
+        }
+    }
+
+    private int parsePositiveQuantity(String quantityText) {
+        try {
+            int quantity = Integer.parseInt(quantityText);
+            if (quantity <= 0) {
+                AlertHelper.showWarning(VALIDATION_ERROR, "Quantity must be greater than zero.");
+                return -1;
+            }
+            return quantity;
+        } catch (NumberFormatException e) {
+            AlertHelper.showWarning(VALIDATION_ERROR, "Quantity must be a valid whole number.");
+            return -1;
         }
     }
 
@@ -111,27 +128,25 @@ public class AddBookPageController {
     }
 
     private void clearFields() {
-        if (txtBookId != null) {
-            txtBookId.clear();
-        }
-        if (txtBookTitle != null) {
-            txtBookTitle.clear();
-        }
-        if (txtAuthor != null) {
-            txtAuthor.clear();
+        TextField[] fields = {txtBookId, txtBookTitle, txtAuthor, txtPublishedYear, txtQuantity};
+        for (TextField field : fields) {
+            if (field != null) {
+                field.clear();
+            }
         }
         if (cmbCategory != null) {
             cmbCategory.getSelectionModel().clearSelection();
             cmbCategory.setValue(null);
         }
-        if (txtPublishedYear != null) {
-            txtPublishedYear.clear();
-        }
-        if (txtQuantity != null) {
-            txtQuantity.clear();
-        }
         if (txtBookId != null) {
             txtBookId.requestFocus();
         }
+    }
+
+    private String getTrimmedText(TextField field) {
+        if (field == null || field.getText() == null) {
+            return "";
+        }
+        return field.getText().trim();
     }
 }

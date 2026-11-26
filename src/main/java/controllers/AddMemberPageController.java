@@ -35,15 +35,15 @@ public class AddMemberPageController {
 
     @FXML
     void btnRegisterMemberOnAction() {
-        String memberId = txtMemberId != null && txtMemberId.getText() != null ? txtMemberId.getText().trim() : "";
-        String fullName = txtName != null && txtName.getText() != null ? txtName.getText().trim() : "";
-        String email = txtEmail != null && txtEmail.getText() != null ? txtEmail.getText().trim() : "";
-        String phone = txtPhone != null && txtPhone.getText() != null ? txtPhone.getText().trim() : "";
-        String address = txtAddress != null && txtAddress.getText() != null ? txtAddress.getText().trim() : "";
+        String memberId = getTrimmedText(txtMemberId);
+        String fullName = getTrimmedText(txtName);
+        String email = getTrimmedText(txtEmail);
+        String phone = getTrimmedText(txtPhone);
+        String address = getTrimmedText(txtAddress);
 
         if (memberId.isEmpty() || fullName.isEmpty() || email.isEmpty()
                 || phone.isEmpty() || address.isEmpty()) {
-            AlertHelper.showWarning(VALIDATION_ERROR, "Please fill in all member fields.");
+            AlertHelper.showWarning(VALIDATION_ERROR, "Please fill in all member details.");
             return;
         }
 
@@ -53,15 +53,19 @@ public class AddMemberPageController {
         }
 
         if (!PHONE_PATTERN.matcher(phone).matches()) {
-            AlertHelper.showWarning(VALIDATION_ERROR, "Please enter a valid phone number.");
+            AlertHelper.showWarning(VALIDATION_ERROR, "Please enter a valid phone number (7–15 digits).");
             return;
         }
 
-        Member member = new Member(memberId, fullName, email, phone, address);
-
         try {
+            if (libraryService.findMemberByCode(memberId) != null) {
+                AlertHelper.showWarning(VALIDATION_ERROR, "Member ID '" + memberId + "' is already registered.");
+                return;
+            }
+
+            Member member = new Member(memberId, fullName, email, phone, address);
             libraryService.addMember(member);
-            AlertHelper.showInfo("Success", "Member registered successfully.");
+            AlertHelper.showInfo("Success", "Member '" + fullName + "' registered successfully.");
             clearFields();
         } catch (SQLException e) {
             AlertHelper.showError("Database Error", "Failed to register member: " + e.getMessage());
@@ -74,23 +78,21 @@ public class AddMemberPageController {
     }
 
     private void clearFields() {
-        if (txtMemberId != null) {
-            txtMemberId.clear();
-        }
-        if (txtName != null) {
-            txtName.clear();
-        }
-        if (txtEmail != null) {
-            txtEmail.clear();
-        }
-        if (txtPhone != null) {
-            txtPhone.clear();
-        }
-        if (txtAddress != null) {
-            txtAddress.clear();
+        TextField[] fields = {txtMemberId, txtName, txtEmail, txtPhone, txtAddress};
+        for (TextField field : fields) {
+            if (field != null) {
+                field.clear();
+            }
         }
         if (txtMemberId != null) {
             txtMemberId.requestFocus();
         }
+    }
+
+    private String getTrimmedText(TextField field) {
+        if (field == null || field.getText() == null) {
+            return "";
+        }
+        return field.getText().trim();
     }
 }

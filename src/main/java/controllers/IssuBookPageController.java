@@ -18,6 +18,7 @@ public class IssuBookPageController {
     private static final String VALIDATION_ERROR = "Validation Error";
     private static final String NOT_FOUND_TITLE = "Not Found";
     private static final long DEFAULT_LOAN_DAYS = 14L;
+    private static final long MAX_LOAN_DAYS = 90L;
 
     private final LibraryService libraryService = new LibraryService();
 
@@ -98,12 +99,17 @@ public class IssuBookPageController {
         }
 
         if (dueDate == null) {
-            AlertHelper.showWarning(VALIDATION_ERROR, "Please select a due date.");
+            AlertHelper.showWarning(VALIDATION_ERROR, "Please select a valid due date.");
             return;
         }
 
         if (!dueDate.isAfter(today)) {
-            AlertHelper.showWarning(VALIDATION_ERROR, "Due date must be a future date.");
+            AlertHelper.showWarning(VALIDATION_ERROR, "Due date must be later than today (" + today + ").");
+            return;
+        }
+
+        if (dueDate.isAfter(today.plusDays(MAX_LOAN_DAYS))) {
+            AlertHelper.showWarning(VALIDATION_ERROR, "Due date cannot exceed " + MAX_LOAN_DAYS + " days from today.");
             return;
         }
 
