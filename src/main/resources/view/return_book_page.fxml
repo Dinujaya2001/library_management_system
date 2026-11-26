@@ -8,40 +8,27 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<VBox spacing="20.0" style="-fx-padding: 30; -fx-background-color: transparent;" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ReturnBookPageController">
-    <Label text="Return Book" textFill="#333333">
-        <font><Font name="System Bold" size="26.0" /></font>
-    </Label>
+<VBox spacing="20.0" style="-fx-padding: 30;" stylesheets="@../css/style.css" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ReturnBookPageController">
+    <Label styleClass="page-title" text="Return Book" />
 
-    <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 5);" VBox.vgrow="ALWAYS">
+    <VBox spacing="15.0" styleClass="card-panel" VBox.vgrow="ALWAYS">
         <HBox alignment="CENTER_LEFT" spacing="12.0">
-            <TextField fx:id="txtSearchRecord" prefHeight="36.0" prefWidth="260.0" promptText="Search by Member ID, Book ID, or Record..." style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" />
-            <Button mnemonicParsing="false" onAction="#btnSearchReturnOnAction" prefHeight="36.0" prefWidth="100.0" style="-fx-background-color: #1abfc7; -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand;" text="Search">
-                <font><Font name="System Bold" size="13.0" /></font>
-            </Button>
-            <Button mnemonicParsing="false" onAction="#btnRefreshReturnOnAction" prefHeight="36.0" prefWidth="100.0" style="-fx-background-color: transparent; -fx-border-color: #94a3b8; -fx-border-radius: 6; -fx-text-fill: #475569; -fx-cursor: hand;" text="Refresh">
-                <font><Font name="System Bold" size="13.0" /></font>
-            </Button>
+            <TextField fx:id="txtSearchRecord" prefHeight="38.0" prefWidth="260.0" promptText="Search by Member ID, Book ID, or Record..." styleClass="input-field" />
+            <Button mnemonicParsing="false" onAction="#btnSearchReturnOnAction" prefHeight="38.0" prefWidth="100.0" styleClass="btn-primary" text="Search" />
+            <Button mnemonicParsing="false" onAction="#btnRefreshReturnOnAction" prefHeight="38.0" prefWidth="100.0" styleClass="btn-neutral" text="Refresh" />
             <Region HBox.hgrow="ALWAYS" />
-            <Button mnemonicParsing="false" onAction="#btnReturnBookOnAction" prefHeight="36.0" prefWidth="140.0" style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand;" text="Return Book">
-                <font><Font name="System Bold" size="13.0" /></font>
-            </Button>
+            <Button mnemonicParsing="false" onAction="#btnReturnBookOnAction" prefHeight="38.0" prefWidth="140.0" styleClass="btn-success" text="Return Book" />
         </HBox>
 
         <HBox alignment="CENTER_LEFT" spacing="25.0">
-            <Label fx:id="lblSelectedInfo" text="No borrow record selected" textFill="#475569">
-                <font><Font name="System Bold" size="13.0" /></font>
-            </Label>
-            <Label fx:id="lblFineAmount" text="Fine: LKR 0.00" textFill="#dc2626">
-                <font><Font name="System Bold" size="13.0" /></font>
-            </Label>
+            <Label fx:id="lblSelectedInfo" styleClass="field-label" text="No borrow record selected" />
+            <Label fx:id="lblFineAmount" styleClass="fine-label" text="Fine: LKR 0.00" />
         </HBox>
 
-        <TableView fx:id="tblActiveBorrows" style="-fx-border-color: #e0e0e0; -fx-border-radius: 6; -fx-background-radius: 6;" VBox.vgrow="ALWAYS">
+        <TableView fx:id="tblActiveBorrows" VBox.vgrow="ALWAYS">
             <columns>
-                <TableColumn fx:id="colRecordId" prefWidth="110.0" text="Record ID" />
+                <TableColumn fx:id="colRecordId" prefWidth="90.0" text="ID" />
                 <TableColumn fx:id="colMemberId" prefWidth="130.0" text="Member ID" />
                 <TableColumn fx:id="colBookId" prefWidth="140.0" text="Book ID" />
                 <TableColumn fx:id="colIssueDate" prefWidth="130.0" text="Issue Date" />

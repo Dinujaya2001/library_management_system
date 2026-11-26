@@ -9,44 +9,42 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<VBox spacing="20.0" style="-fx-padding: 30; -fx-background-color: transparent;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.AddMemberPageController">
-    <Label text="Register New Member" textFill="#333333">
-        <font><Font name="System Bold" size="26.0" /></font>
-    </Label>
+<VBox spacing="20.0" style="-fx-padding: 30;" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.AddMemberPageController">
+    <Label styleClass="page-title" text="Register Member" />
 
-    <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 30; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 5);">
-        <GridPane hgap="20.0" vgap="15.0">
+    <VBox spacing="18.0" styleClass="card-panel">
+        <GridPane hgap="20.0" vgap="18.0">
             <columnConstraints>
                 <ColumnConstraints percentWidth="50" />
                 <ColumnConstraints percentWidth="50" />
             </columnConstraints>
 
-            <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                <Label text="Member ID" textFill="#4a4a4a"><font><Font name="System Bold" size="13.0" /></font></Label>
-                <TextField fx:id="txtMemberId" prefHeight="40.0" style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" />
+            <VBox spacing="6.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                <Label styleClass="field-label" text="Member ID" />
+                <TextField fx:id="txtMemberId" prefHeight="40.0" promptText="e.g., MEM-001" styleClass="input-field" />
             </VBox>
 
-            <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                <Label text="Full Name" textFill="#4a4a4a"><font><Font name="System Bold" size="13.0" /></font></Label>
-                <TextField fx:id="txtName" prefHeight="40.0" style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" />
+            <VBox spacing="6.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                <Label styleClass="field-label" text="Full Name" />
+                <TextField fx:id="txtName" prefHeight="40.0" promptText="Enter Full Name" styleClass="input-field" />
             </VBox>
 
-            <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                <Label text="Email" textFill="#4a4a4a"><font><Font name="System Bold" size="13.0" /></font></Label>
-                <TextField fx:id="txtEmail" prefHeight="40.0" style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" />
+            <VBox spacing="6.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                <Label styleClass="field-label" text="Email Address" />
+                <TextField fx:id="txtEmail" prefHeight="40.0" promptText="example@mail.com" styleClass="input-field" />
             </VBox>
 
-            <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                <Label text="Phone Number" textFill="#4a4a4a"><font><Font name="System Bold" size="13.0" /></font></Label>
-                <TextField fx:id="txtPhone" prefHeight="40.0" style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" />
+            <VBox spacing="6.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                <Label styleClass="field-label" text="Phone Number" />
+                <TextField fx:id="txtPhone" prefHeight="40.0" promptText="+94 7X XXX XXXX" styleClass="input-field" />
             </VBox>
 
-            <VBox spacing="5" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="2">
-                <Label text="Address" textFill="#4a4a4a"><font><Font name="System Bold" size="13.0" /></font></Label>
-                <TextField fx:id="txtAddress" prefHeight="40.0" style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" />
+            <VBox spacing="6.0" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="2">
+                <Label styleClass="field-label" text="Address" />
+                <TextField fx:id="txtAddress" prefHeight="40.0" promptText="Enter Residential Address" styleClass="input-field" />
             </VBox>
+
             <rowConstraints>
                 <RowConstraints />
                 <RowConstraints />
@@ -55,13 +53,9 @@
         </GridPane>
 
         <HBox alignment="CENTER_RIGHT" spacing="15.0">
-            <VBox.margin><Insets top="20.0" /></VBox.margin>
-            <Button mnemonicParsing="false" onAction="#btnClearMemberOnAction" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: transparent; -fx-border-color: #1abfc7; -fx-border-radius: 6; -fx-text-fill: #1abfc7; -fx-cursor: hand;" text="Clear">
-                <font><Font name="System Bold" size="14.0" /></font>
-            </Button>
-            <Button mnemonicParsing="false" onAction="#btnRegisterMemberOnAction" prefHeight="40.0" prefWidth="180.0" style="-fx-background-color: #1abfc7; -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand;" text="Register Member">
-                <font><Font name="System Bold" size="14.0" /></font>
-            </Button>
+            <VBox.margin><Insets top="10.0" /></VBox.margin>
+            <Button mnemonicParsing="false" onAction="#btnClearMemberOnAction" prefHeight="40.0" prefWidth="120.0" styleClass="btn-outline" text="Clear" />
+            <Button mnemonicParsing="false" onAction="#btnRegisterMemberOnAction" prefHeight="40.0" prefWidth="160.0" styleClass="btn-primary" text="Register Member" />
         </HBox>
     </VBox>
 </VBox>

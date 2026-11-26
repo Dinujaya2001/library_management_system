@@ -10,80 +10,48 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<VBox spacing="20.0" style="-fx-padding: 30; -fx-background-color: transparent;" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ManageMemberPageController">
-    <Label text="Manage Members" textFill="#333333">
-        <font><Font name="System Bold" size="26.0" /></font>
-    </Label>
+<VBox spacing="20.0" style="-fx-padding: 30;" stylesheets="@../css/style.css" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ManageMemberPageController">
+    <Label styleClass="page-title" text="Manage Members" />
 
-    <!-- Search & Action Bar + Form Fields -->
-    <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 5);">
+    <VBox spacing="15.0" styleClass="card-panel" VBox.vgrow="ALWAYS">
         <HBox alignment="CENTER_LEFT" spacing="12.0">
-            <TextField fx:id="txtSearchMember" prefHeight="35.0" prefWidth="260.0" promptText="Search by Member ID or Name..." style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" />
-            <Button mnemonicParsing="false" onAction="#btnSearchMemberOnAction" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #1abfc7; -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand;" text="Search">
-                <font><Font name="System Bold" size="13.0" /></font>
-            </Button>
-            <Button mnemonicParsing="false" onAction="#btnResetSelectionOnAction" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: transparent; -fx-border-color: #94a3b8; -fx-border-radius: 6; -fx-text-fill: #475569; -fx-cursor: hand;" text="Reset">
-                <font><Font name="System Bold" size="13.0" /></font>
-            </Button>
+            <TextField fx:id="txtSearchMember" prefHeight="38.0" prefWidth="280.0" promptText="Search by ID, Name, or Email..." styleClass="input-field" />
+            <Button mnemonicParsing="false" onAction="#btnSearchMemberOnAction" prefHeight="38.0" prefWidth="100.0" styleClass="btn-primary" text="Search" />
+            <Button mnemonicParsing="false" onAction="#btnResetSelectionOnAction" prefHeight="38.0" prefWidth="100.0" styleClass="btn-neutral" text="Reset" />
         </HBox>
 
-        <GridPane hgap="15.0" vgap="10.0">
+        <GridPane hgap="15.0" vgap="12.0">
             <columnConstraints>
-                <ColumnConstraints percentWidth="33.33" />
-                <ColumnConstraints percentWidth="33.33" />
-                <ColumnConstraints percentWidth="33.33" />
+                <ColumnConstraints percentWidth="33.3" />
+                <ColumnConstraints percentWidth="33.3" />
+                <ColumnConstraints percentWidth="33.4" />
             </columnConstraints>
 
-            <VBox spacing="4.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                <Label text="Member ID" textFill="#4a4a4a"><font><Font name="System Bold" size="12.0" /></font></Label>
-                <TextField fx:id="txtMemberId" prefHeight="35.0" promptText="Member ID" style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" />
-            </VBox>
+            <TextField fx:id="txtMemberId" prefHeight="38.0" promptText="Member ID" styleClass="input-field" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <TextField fx:id="txtFullName" prefHeight="38.0" promptText="Full Name" styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+            <TextField fx:id="txtEmail" prefHeight="38.0" promptText="Email Address" styleClass="input-field" GridPane.columnIndex="2" GridPane.rowIndex="0" />
 
-            <VBox spacing="4.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                <Label text="Full Name" textFill="#4a4a4a"><font><Font name="System Bold" size="12.0" /></font></Label>
-                <TextField fx:id="txtFullName" prefHeight="35.0" promptText="Full Name" style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" />
-            </VBox>
+            <TextField fx:id="txtPhone" prefHeight="38.0" promptText="Phone Number" styleClass="input-field" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+            <TextField fx:id="txtAddress" prefHeight="38.0" promptText="Address" styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-            <VBox spacing="4.0" GridPane.columnIndex="2" GridPane.rowIndex="0">
-                <Label text="Email" textFill="#4a4a4a"><font><Font name="System Bold" size="12.0" /></font></Label>
-                <TextField fx:id="txtEmail" prefHeight="35.0" promptText="Email" style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" />
-            </VBox>
+            <HBox alignment="CENTER_RIGHT" spacing="10.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                <Button mnemonicParsing="false" onAction="#btnUpdateMemberOnAction" prefHeight="38.0" prefWidth="110.0" styleClass="btn-success" text="Update" />
+                <Button mnemonicParsing="false" onAction="#btnDeleteMemberOnAction" prefHeight="38.0" prefWidth="110.0" styleClass="btn-danger" text="Delete" />
+            </HBox>
 
-            <VBox spacing="4.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                <Label text="Phone Number" textFill="#4a4a4a"><font><Font name="System Bold" size="12.0" /></font></Label>
-                <TextField fx:id="txtPhone" prefHeight="35.0" promptText="Phone Number" style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" />
-            </VBox>
-
-            <VBox spacing="4.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1">
-                <Label text="Address" textFill="#4a4a4a"><font><Font name="System Bold" size="12.0" /></font></Label>
-                <TextField fx:id="txtAddress" prefHeight="35.0" promptText="Address" style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;" />
-            </VBox>
             <rowConstraints>
                 <RowConstraints />
                 <RowConstraints />
             </rowConstraints>
         </GridPane>
 
-        <HBox alignment="CENTER_RIGHT" spacing="12.0">
-            <Button mnemonicParsing="false" onAction="#btnUpdateMemberOnAction" prefHeight="35.0" prefWidth="130.0" style="-fx-background-color: #f59e0b; -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand;" text="Update Member">
-                <font><Font name="System Bold" size="13.0" /></font>
-            </Button>
-            <Button mnemonicParsing="false" onAction="#btnDeleteMemberOnAction" prefHeight="35.0" prefWidth="130.0" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand;" text="Delete Member">
-                <font><Font name="System Bold" size="13.0" /></font>
-            </Button>
-        </HBox>
-    </VBox>
-
-    <!-- Members Table -->
-    <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 5);" VBox.vgrow="ALWAYS">
-        <TableView fx:id="tblMembers" style="-fx-border-color: #e0e0e0; -fx-border-radius: 6; -fx-background-radius: 6;" VBox.vgrow="ALWAYS">
+        <TableView fx:id="tblMembers" VBox.vgrow="ALWAYS">
             <columns>
-                <TableColumn fx:id="colMemberId" prefWidth="110.0" text="Member ID" />
+                <TableColumn fx:id="colMemberId" prefWidth="120.0" text="Member ID" />
                 <TableColumn fx:id="colFullName" prefWidth="180.0" text="Full Name" />
-                <TableColumn fx:id="colEmail" prefWidth="190.0" text="Email" />
-                <TableColumn fx:id="colPhone" prefWidth="130.0" text="Phone" />
+                <TableColumn fx:id="colEmail" prefWidth="200.0" text="Email" />
+                <TableColumn fx:id="colPhone" prefWidth="140.0" text="Phone" />
                 <TableColumn fx:id="colAddress" prefWidth="220.0" text="Address" />
             </columns>
         </TableView>
