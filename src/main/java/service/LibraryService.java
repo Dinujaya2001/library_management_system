@@ -1,5 +1,9 @@
 package service;
 
+import dto.BookDTO;
+import dto.BorrowRecordDTO;
+import dto.DashboardStatsDTO;
+import dto.MemberDTO;
 import model.Book;
 import model.BorrowRecord;
 import model.Member;
@@ -22,60 +26,56 @@ public class LibraryService {
     private final MemberRepository memberRepository = new MemberRepository();
     private final BorrowRepository borrowRepository = new BorrowRepository();
 
-    public int getTotalBooks() throws SQLException {
-        return bookRepository.getTotalBooksCount();
+    public DashboardStatsDTO getDashboardStats() throws SQLException {
+        int totalBooks = bookRepository.getTotalBooksCount();
+        int totalMembers = memberRepository.getTotalMembersCount();
+        int borrowed = borrowRepository.getCurrentlyBorrowedCount();
+        int overdue = borrowRepository.getOverdueCount(LocalDate.now(ZoneId.systemDefault()));
+        return new DashboardStatsDTO(totalBooks, totalMembers, borrowed, overdue);
     }
 
-    public int getTotalMembers() throws SQLException {
-        return memberRepository.getTotalMembersCount();
-    }
-
-    public int getCurrentlyBorrowedCount() throws SQLException {
-        return borrowRepository.getCurrentlyBorrowedCount();
-    }
-
-    public int getOverdueCount() throws SQLException {
-        return borrowRepository.getOverdueCount(LocalDate.now(ZoneId.systemDefault()));
-    }
-
-    public void addBook(Book book) throws SQLException {
-        if (book == null) {
+    public void addBook(BookDTO bookDto) throws SQLException {
+        if (bookDto == null) {
             throw new IllegalArgumentException("Book details cannot be null.");
         }
-        bookRepository.save(book);
+        Book entity = toBookEntity(bookDto);
+        bookRepository.save(entity);
     }
 
-    public Book findBookByCode(String bookCode) throws SQLException {
-        return bookRepository.findByCode(bookCode);
+    public BookDTO findBookByCode(String bookCode) throws SQLException {
+        Book book = bookRepository.findByCode(bookCode);
+        return book != null ? toBookDTO(book) : null;
     }
 
-    public void addMember(Member member) throws SQLException {
-        if (member == null) {
+    public void addMember(MemberDTO memberDto) throws SQLException {
+        if (memberDto == null) {
             throw new IllegalArgumentException("Member details cannot be null.");
         }
-        memberRepository.save(member);
+        Member entity = toMemberEntity(memberDto);
+        memberRepository.save(entity);
     }
 
-    public Member findMemberByCode(String memberCode) throws SQLException {
-        return memberRepository.findByCode(memberCode);
+    public MemberDTO findMemberByCode(String memberCode) throws SQLException {
+        Member member = memberRepository.findByCode(memberCode);
+        return member != null ? toMemberDTO(member) : null;
     }
 
-    public List<Member> getAllMembers() throws SQLException {
-        return memberRepository.findAll();
+    public List<MemberDTO> getAllMembers() throws SQLException {
+        return toMemberDTOList(memberRepository.findAll());
     }
 
-    public List<Member> searchMembers(String keyword) throws SQLException {
+    public List<MemberDTO> searchMembers(String keyword) throws SQLException {
         if (keyword == null || keyword.isBlank()) {
-            return memberRepository.findAll();
+            return getAllMembers();
         }
-        return memberRepository.search(keyword.trim());
+        return toMemberDTOList(memberRepository.search(keyword.trim()));
     }
 
-    public void updateMember(Member member) throws SQLException {
-        if (member == null) {
+    public void updateMember(MemberDTO memberDto) throws SQLException {
+        if (memberDto == null) {
             throw new IllegalArgumentException("Member details cannot be null.");
         }
-        memberRepository.update(member);
+        memberRepository.update(toMemberEntity(memberDto));
     }
 
     public void deleteMember(String memberCode) throws SQLException {
@@ -98,19 +98,26 @@ public class LibraryService {
             throw new IllegalStateException("No copies available for book: " + book.getTitle());
         }
 
-        borrowRepository.issueBook(memberCode, bookCode, issueDate, dueDate);
+        borrowRepository.issueBook(
+                memberCode,
+                member.getFullName(),
+                bookCode,
+                book.getTitle(),
+                issueDate,
+                dueDate
+        );
         bookRepository.decrementAvailableQuantity(bookCode);
     }
 
-    public List<BorrowRecord> getActiveBorrowRecords() throws SQLException {
-        return borrowRepository.findActiveRecords();
+    public List<BorrowRecordDTO> getActiveBorrowRecords() throws SQLException {
+        return toBorrowRecordDTOList(borrowRepository.findActiveRecords());
     }
 
-    public List<BorrowRecord> searchActiveBorrowRecords(String keyword) throws SQLException {
+    public List<BorrowRecordDTO> searchActiveBorrowRecords(String keyword) throws SQLException {
         if (keyword == null || keyword.isBlank()) {
-            return borrowRepository.findActiveRecords();
+            return getActiveBorrowRecords();
         }
-        return borrowRepository.searchActiveRecords(keyword.trim());
+        return toBorrowRecordDTOList(borrowRepository.searchActiveRecords(keyword.trim()));
     }
 
     public void returnBook(int recordId, LocalDate returnDate) throws SQLException {
@@ -126,12 +133,12 @@ public class LibraryService {
         bookRepository.incrementAvailableQuantity(borrowRecord.getBookCode());
     }
 
-    public List<BorrowRecord> getBorrowHistory(String status, String keyword) throws SQLException {
+    public List<BorrowRecordDTO> getBorrowHistory(String status, String keyword) throws SQLException {
         List<BorrowRecord> allRecords = borrowRepository.findAllHistory();
         String normalizedStatus = (status == null || status.isBlank()) ? FILTER_ALL : status.trim();
         String normalizedKeyword = (keyword == null) ? "" : keyword.trim().toLowerCase(Locale.ROOT);
 
-        List<BorrowRecord> filtered = new ArrayList<>();
+        List<BorrowRecordDTO> filtered = new ArrayList<>();
         for (BorrowRecord borrowRecord : allRecords) {
             boolean matchesStatus = FILTER_ALL.equalsIgnoreCase(normalizedStatus)
                     || (borrowRecord.getStatus() != null && borrowRecord.getStatus().equalsIgnoreCase(normalizedStatus));
@@ -145,10 +152,96 @@ public class LibraryService {
                     || containsIgnoreCase(borrowRecord.getStatus(), normalizedKeyword);
 
             if (matchesStatus && matchesKeyword) {
-                filtered.add(borrowRecord);
+                filtered.add(toBorrowRecordDTO(borrowRecord));
             }
         }
         return filtered;
+    }
+
+    // --- Entity <-> DTO Mappers ---
+
+    private Book toBookEntity(BookDTO dto) {
+        Book book = new Book(
+                dto.getBookCode(),
+                dto.getTitle(),
+                dto.getAuthor(),
+                dto.getCategory(),
+                dto.getPublishedYear(),
+                dto.getQuantity()
+        );
+        book.setId(dto.getId());
+        if (dto.getAvailableQuantity() > 0) {
+            book.setAvailableQuantity(dto.getAvailableQuantity());
+        }
+        return book;
+    }
+
+    private BookDTO toBookDTO(Book entity) {
+        BookDTO dto = new BookDTO(
+                entity.getBookCode(),
+                entity.getTitle(),
+                entity.getAuthor(),
+                entity.getCategory(),
+                entity.getPublishedYear(),
+                entity.getQuantity()
+        );
+        dto.setId(entity.getId());
+        dto.setAvailableQuantity(entity.getAvailableQuantity());
+        return dto;
+    }
+
+    private Member toMemberEntity(MemberDTO dto) {
+        Member member = new Member(
+                dto.getMemberCode(),
+                dto.getFullName(),
+                dto.getEmail(),
+                dto.getPhone(),
+                dto.getAddress()
+        );
+        member.setId(dto.getId());
+        return member;
+    }
+
+    private MemberDTO toMemberDTO(Member entity) {
+        MemberDTO dto = new MemberDTO(
+                entity.getMemberCode(),
+                entity.getFullName(),
+                entity.getEmail(),
+                entity.getPhone(),
+                entity.getAddress()
+        );
+        dto.setId(entity.getId());
+        return dto;
+    }
+
+    private List<MemberDTO> toMemberDTOList(List<Member> entities) {
+        List<MemberDTO> list = new ArrayList<>();
+        for (Member member : entities) {
+            list.add(toMemberDTO(member));
+        }
+        return list;
+    }
+
+    private BorrowRecordDTO toBorrowRecordDTO(BorrowRecord entity) {
+        BorrowRecordDTO dto = new BorrowRecordDTO();
+        dto.setId(entity.getId());
+        dto.setMemberCode(entity.getMemberCode());
+        dto.setMemberName(entity.getMemberName());
+        dto.setBookCode(entity.getBookCode());
+        dto.setBookTitle(entity.getBookTitle());
+        dto.setIssueDate(entity.getIssueDate());
+        dto.setDueDate(entity.getDueDate());
+        dto.setReturnDate(entity.getReturnDate());
+        dto.setStatus(entity.getStatus());
+        return dto;
+    }
+
+    private List<BorrowRecordDTO> toBorrowRecordDTOList(List<BorrowRecord> entities) {
+        List<BorrowRecordDTO> list = new ArrayList<>();
+        for (BorrowRecord borrowRecord : entities) {
+            list.add(toBorrowRecordDTO(borrowRecord));
+        }
+        return list;
     }
 
     private boolean containsIgnoreCase(String value, String lowerKeyword) {
