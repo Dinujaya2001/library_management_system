@@ -1,11 +1,11 @@
 package controllers;
 
+import dto.BookDTO;
+import dto.MemberDTO;
 import javafx.fxml.FXML;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import model.Book;
-import model.Member;
 import service.LibraryService;
 
 import java.sql.SQLException;
@@ -53,13 +53,13 @@ public class IssuBookPageController {
         }
 
         try {
-            Member member = libraryService.findMemberByCode(memberId);
-            if (member == null) {
+            MemberDTO memberDto = libraryService.findMemberByCode(memberId);
+            if (memberDto == null) {
                 setLabelText(lblMemberDetails, "Member not found.");
                 AlertHelper.showWarning(NOT_FOUND_TITLE, "No member found with ID: " + memberId);
                 return;
             }
-            setLabelText(lblMemberDetails, member.getFullName() + " (" + member.getEmail() + ")");
+            setLabelText(lblMemberDetails, memberDto.getFullName() + " (" + memberDto.getEmail() + ")");
         } catch (SQLException e) {
             AlertHelper.showError(DATABASE_ERROR, "Failed to find member: " + e.getMessage());
         }
@@ -74,13 +74,13 @@ public class IssuBookPageController {
         }
 
         try {
-            Book book = libraryService.findBookByCode(bookId);
-            if (book == null) {
+            BookDTO bookDto = libraryService.findBookByCode(bookId);
+            if (bookDto == null) {
                 setLabelText(lblBookDetails, "Book not found.");
                 AlertHelper.showWarning(NOT_FOUND_TITLE, "No book found with ID: " + bookId);
                 return;
             }
-            setLabelText(lblBookDetails, book.getTitle() + " — Available: " + book.getAvailableQuantity());
+            setLabelText(lblBookDetails, bookDto.getTitle() + " — Available: " + bookDto.getAvailableQuantity());
         } catch (SQLException e) {
             AlertHelper.showError(DATABASE_ERROR, "Failed to find book: " + e.getMessage());
         }

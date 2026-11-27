@@ -1,5 +1,6 @@
 package controllers;
 
+import dto.BorrowRecordDTO;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -8,7 +9,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import model.BorrowRecord;
 import service.LibraryService;
 
 import java.sql.SQLException;
@@ -21,7 +21,7 @@ public class HistoryPageController {
     private static final String FILTER_ALL = "All";
 
     private final LibraryService libraryService = new LibraryService();
-    private final ObservableList<BorrowRecord> historyList = FXCollections.observableArrayList();
+    private final ObservableList<BorrowRecordDTO> historyList = FXCollections.observableArrayList();
 
     @FXML
     private TextField txtSearchHistory;
@@ -30,34 +30,34 @@ public class HistoryPageController {
     private ComboBox<String> cmbStatusFilter;
 
     @FXML
-    private TableView<BorrowRecord> tblHistory;
+    private TableView<BorrowRecordDTO> tblHistory;
 
     @FXML
-    private TableColumn<BorrowRecord, Integer> colRecordId;
+    private TableColumn<BorrowRecordDTO, Integer> colRecordId;
 
     @FXML
-    private TableColumn<BorrowRecord, String> colMemberId;
+    private TableColumn<BorrowRecordDTO, String> colMemberId;
 
     @FXML
-    private TableColumn<BorrowRecord, String> colMemberName;
+    private TableColumn<BorrowRecordDTO, String> colMemberName;
 
     @FXML
-    private TableColumn<BorrowRecord, String> colBookId;
+    private TableColumn<BorrowRecordDTO, String> colBookId;
 
     @FXML
-    private TableColumn<BorrowRecord, String> colBookTitle;
+    private TableColumn<BorrowRecordDTO, String> colBookTitle;
 
     @FXML
-    private TableColumn<BorrowRecord, LocalDate> colIssueDate;
+    private TableColumn<BorrowRecordDTO, LocalDate> colIssueDate;
 
     @FXML
-    private TableColumn<BorrowRecord, LocalDate> colDueDate;
+    private TableColumn<BorrowRecordDTO, LocalDate> colDueDate;
 
     @FXML
-    private TableColumn<BorrowRecord, LocalDate> colReturnDate;
+    private TableColumn<BorrowRecordDTO, LocalDate> colReturnDate;
 
     @FXML
-    private TableColumn<BorrowRecord, String> colStatus;
+    private TableColumn<BorrowRecordDTO, String> colStatus;
 
     @FXML
     public void initialize() {
@@ -77,7 +77,7 @@ public class HistoryPageController {
         }
     }
 
-    private <T> void bindColumn(TableColumn<BorrowRecord, T> column, String propertyName) {
+    private <T> void bindColumn(TableColumn<BorrowRecordDTO, T> column, String propertyName) {
         if (column != null) {
             column.setCellValueFactory(new PropertyValueFactory<>(propertyName));
         }
@@ -101,7 +101,7 @@ public class HistoryPageController {
 
     private void loadHistory(String status, String keyword) {
         try {
-            List<BorrowRecord> records = libraryService.getBorrowHistory(status, keyword);
+            List<BorrowRecordDTO> records = libraryService.getBorrowHistory(status, keyword);
             historyList.setAll(records);
         } catch (SQLException e) {
             AlertHelper.showError(DATABASE_ERROR, "Failed to load borrowing history: " + e.getMessage());

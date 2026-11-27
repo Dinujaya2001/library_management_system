@@ -1,9 +1,9 @@
 package controllers;
 
+import dto.BookDTO;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
-import model.Book;
 import service.LibraryService;
 
 import java.sql.SQLException;
@@ -81,8 +81,8 @@ public class AddBookPageController {
                 return;
             }
 
-            Book book = new Book(bookCode, title, author, category, publishedYear, quantity);
-            libraryService.addBook(book);
+            BookDTO bookDto = new BookDTO(bookCode, title, author, category, publishedYear, quantity);
+            libraryService.addBook(bookDto);
             AlertHelper.showInfo("Success", "Book '" + title + "' added successfully.");
             clearFields();
         } catch (IllegalArgumentException e) {

@@ -1,5 +1,6 @@
 package controllers;
 
+import dto.DashboardStatsDTO;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -41,26 +42,26 @@ public class HomePageController implements Initializable {
         if (mainPane != null) {
             dashboardCenter = mainPane.getCenter();
         }
-        refreshDashboardCounts();
+        refreshDashboardStats();
     }
 
-    public void refreshDashboardCounts() {
+    private void refreshDashboardStats() {
         try {
+            DashboardStatsDTO stats = libraryService.getDashboardStats();
             if (lblTotalBooks != null) {
-                lblTotalBooks.setText(String.valueOf(libraryService.getTotalBooks()));
+                lblTotalBooks.setText(String.valueOf(stats.getTotalBooks()));
             }
             if (lblTotalMembers != null) {
-                lblTotalMembers.setText(String.valueOf(libraryService.getTotalMembers()));
+                lblTotalMembers.setText(String.valueOf(stats.getTotalMembers()));
             }
             if (lblBorrowedBooks != null) {
-                lblBorrowedBooks.setText(String.valueOf(libraryService.getCurrentlyBorrowedCount()));
+                lblBorrowedBooks.setText(String.valueOf(stats.getCurrentlyBorrowed()));
             }
             if (lblOverdueBooks != null) {
-                lblOverdueBooks.setText(String.valueOf(libraryService.getOverdueCount()));
+                lblOverdueBooks.setText(String.valueOf(stats.getOverdueCount()));
             }
         } catch (SQLException e) {
-            AlertHelper.showWarning("Database Notice",
-                    "Could not refresh dashboard statistics: " + e.getMessage());
+            AlertHelper.showWarning("Database Notice", "Could not refresh dashboard statistics: " + e.getMessage());
         }
     }
 
@@ -85,7 +86,7 @@ public class HomePageController implements Initializable {
         if (mainPane != null && dashboardCenter != null) {
             mainPane.setCenter(dashboardCenter);
         }
-        refreshDashboardCounts();
+        refreshDashboardStats();
     }
 
     @FXML

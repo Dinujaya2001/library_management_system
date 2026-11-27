@@ -40,15 +40,18 @@ public class BorrowRepository {
         }
     }
 
-    public void issueBook(String memberCode, String bookCode, LocalDate issueDate, LocalDate dueDate)
-            throws SQLException {
-        String sql = "INSERT INTO borrow_records (member_code, book_code, issue_date, due_date, status) VALUES (?, ?, ?, ?, 'ISSUED')";
+    public void issueBook(String memberCode, String memberName, String bookCode, String bookTitle,
+                          LocalDate issueDate, LocalDate dueDate) throws SQLException {
+        String sql = "INSERT INTO borrow_records (member_code, member_name, book_code, book_title, issue_date, due_date, status) " +
+                "VALUES (?, ?, ?, ?, ?, ?, 'ISSUED')";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, memberCode);
-            stmt.setString(2, bookCode);
-            stmt.setObject(3, issueDate);
-            stmt.setObject(4, dueDate);
+            stmt.setString(2, memberName);
+            stmt.setString(3, bookCode);
+            stmt.setString(4, bookTitle);
+            stmt.setObject(5, issueDate);
+            stmt.setObject(6, dueDate);
             stmt.executeUpdate();
         }
     }

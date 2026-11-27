@@ -1,8 +1,8 @@
 package controllers;
 
+import dto.MemberDTO;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
-import model.Member;
 import service.LibraryService;
 
 import java.sql.SQLException;
@@ -53,7 +53,7 @@ public class AddMemberPageController {
         }
 
         if (!PHONE_PATTERN.matcher(phone).matches()) {
-            AlertHelper.showWarning(VALIDATION_ERROR, "Please enter a valid phone number (7–15 digits).");
+            AlertHelper.showWarning(VALIDATION_ERROR, "Please enter a valid phone number (7-15 digits).");
             return;
         }
 
@@ -63,8 +63,8 @@ public class AddMemberPageController {
                 return;
             }
 
-            Member member = new Member(memberId, fullName, email, phone, address);
-            libraryService.addMember(member);
+            MemberDTO memberDto = new MemberDTO(memberId, fullName, email, phone, address);
+            libraryService.addMember(memberDto);
             AlertHelper.showInfo("Success", "Member '" + fullName + "' registered successfully.");
             clearFields();
         } catch (SQLException e) {

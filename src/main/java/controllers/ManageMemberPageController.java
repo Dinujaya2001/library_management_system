@@ -1,5 +1,6 @@
 package controllers;
 
+import dto.MemberDTO;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -7,24 +8,18 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import model.Member;
 import service.LibraryService;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class ManageMemberPageController {
 
     private static final String DATABASE_ERROR = "Database Error";
     private static final String VALIDATION_ERROR = "Validation Error";
-    private static final Pattern EMAIL_PATTERN =
-            Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
-    private static final Pattern PHONE_PATTERN =
-            Pattern.compile("^[0-9+\\-\\s]{7,15}$");
 
     private final LibraryService libraryService = new LibraryService();
-    private final ObservableList<Member> memberList = FXCollections.observableArrayList();
+    private final ObservableList<MemberDTO> memberList = FXCollections.observableArrayList();
 
     @FXML
     private TextField txtSearchMember;
@@ -45,157 +40,111 @@ public class ManageMemberPageController {
     private TextField txtAddress;
 
     @FXML
-    private TableView<Member> tblMembers;
+    private TableView<MemberDTO> tblMembers;
 
     @FXML
-    private TableColumn<Member, String> colMemberId;
+    private TableColumn<MemberDTO, String> colMemberId;
 
     @FXML
-    private TableColumn<Member, String> colFullName;
+    private TableColumn<MemberDTO, String> colFullName;
 
     @FXML
-    private TableColumn<Member, String> colEmail;
+    private TableColumn<MemberDTO, String> colEmail;
 
     @FXML
-    private TableColumn<Member, String> colPhone;
+    private TableColumn<MemberDTO, String> colPhone;
 
     @FXML
-    private TableColumn<Member, String> colAddress;
-
-    private Member selectedMember;
+    private TableColumn<MemberDTO, String> colAddress;
 
     @FXML
     public void initialize() {
-        setupTableColumns();
-        loadMembers();
+        bindColumn(colMemberId, "memberCode");
+        bindColumn(colFullName, "fullName");
+        bindColumn(colEmail, "email");
+        bindColumn(colPhone, "phone");
+        bindColumn(colAddress, "address");
 
-        if (tblMembers != null) {
-            tblMembers.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-                if (newSelection != null) {
-                    populateFields(newSelection);
-                }
-            });
-        }
-    }
-
-    private void setupTableColumns() {
-        if (colMemberId != null) {
-            colMemberId.setCellValueFactory(new PropertyValueFactory<>("memberCode"));
-        }
-        if (colFullName != null) {
-            colFullName.setCellValueFactory(new PropertyValueFactory<>("fullName"));
-        }
-        if (colEmail != null) {
-            colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
-        }
-        if (colPhone != null) {
-            colPhone.setCellValueFactory(new PropertyValueFactory<>("phone"));
-        }
-        if (colAddress != null) {
-            colAddress.setCellValueFactory(new PropertyValueFactory<>("address"));
-        }
         if (tblMembers != null) {
             tblMembers.setItems(memberList);
+            tblMembers.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> populateFields(newVal));
+        }
+
+        if (txtMemberId != null) {
+            txtMemberId.setEditable(false);
+        }
+
+        loadMembers("");
+    }
+
+    private <T> void bindColumn(TableColumn<MemberDTO, T> column, String property) {
+        if (column != null) {
+            column.setCellValueFactory(new PropertyValueFactory<>(property));
         }
     }
 
-    private void loadMembers() {
+    private void populateFields(MemberDTO member) {
+        if (member == null) {
+            clearForm();
+            return;
+        }
+        setText(txtMemberId, member.getMemberCode());
+        setText(txtFullName, member.getFullName());
+        setText(txtEmail, member.getEmail());
+        setText(txtPhone, member.getPhone());
+        setText(txtAddress, member.getAddress());
+    }
+
+    private void loadMembers(String keyword) {
         try {
-            List<Member> members = libraryService.getAllMembers();
+            List<MemberDTO> members = keyword.isEmpty()
+                    ? libraryService.getAllMembers()
+                    : libraryService.searchMembers(keyword);
             memberList.setAll(members);
         } catch (SQLException e) {
             AlertHelper.showError(DATABASE_ERROR, "Failed to load members: " + e.getMessage());
         }
     }
 
-    private void populateFields(Member member) {
-        selectedMember = member;
-        if (txtMemberId != null) {
-            txtMemberId.setText(member.getMemberCode());
-            txtMemberId.setEditable(false);
-        }
-        if (txtFullName != null) {
-            txtFullName.setText(member.getFullName());
-        }
-        if (txtEmail != null) {
-            txtEmail.setText(member.getEmail());
-        }
-        if (txtPhone != null) {
-            txtPhone.setText(member.getPhone());
-        }
-        if (txtAddress != null) {
-            txtAddress.setText(member.getAddress());
-        }
-    }
-
-    private Member resolveSelectedMember() {
-        if (selectedMember != null) {
-            return selectedMember;
-        }
-        if (tblMembers != null) {
-            return tblMembers.getSelectionModel().getSelectedItem();
-        }
-        return null;
-    }
-
-    private String getTrimmedText(TextField field) {
-        if (field == null || field.getText() == null) {
-            return "";
-        }
-        return field.getText().trim();
-    }
-
-    private boolean isValidMemberInput(String fullName, String email, String phone, String address) {
-        if (fullName.isEmpty() || email.isEmpty() || phone.isEmpty() || address.isEmpty()) {
-            AlertHelper.showWarning(VALIDATION_ERROR, "Please fill in all required member details.");
-            return false;
-        }
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
-            AlertHelper.showWarning(VALIDATION_ERROR, "Please enter a valid email address.");
-            return false;
-        }
-        if (!PHONE_PATTERN.matcher(phone).matches()) {
-            AlertHelper.showWarning(VALIDATION_ERROR, "Please enter a valid phone number.");
-            return false;
-        }
-        return true;
+    @FXML
+    void btnSearchMemberOnAction() {
+        loadMembers(getTrimmedText(txtSearchMember));
     }
 
     @FXML
-    void btnSearchMemberOnAction() {
-        String keyword = getTrimmedText(txtSearchMember);
-        try {
-            List<Member> results = libraryService.searchMembers(keyword);
-            memberList.setAll(results);
-        } catch (SQLException e) {
-            AlertHelper.showError(DATABASE_ERROR, "Failed to search members: " + e.getMessage());
+    void btnResetSelectionOnAction() {
+        if (txtSearchMember != null) {
+            txtSearchMember.clear();
         }
+        if (tblMembers != null) {
+            tblMembers.getSelectionModel().clearSelection();
+        }
+        clearForm();
+        loadMembers("");
     }
 
     @FXML
     void btnUpdateMemberOnAction() {
-        Member target = resolveSelectedMember();
-        if (target == null) {
-            AlertHelper.showWarning("No Selection", "Please select a member from the table to update.");
-            return;
-        }
-
+        String memberId = getTrimmedText(txtMemberId);
         String fullName = getTrimmedText(txtFullName);
         String email = getTrimmedText(txtEmail);
         String phone = getTrimmedText(txtPhone);
         String address = getTrimmedText(txtAddress);
 
-        if (!isValidMemberInput(fullName, email, phone, address)) {
+        if (memberId.isEmpty()) {
+            AlertHelper.showWarning(VALIDATION_ERROR, "Please select a member from the table to update.");
+            return;
+        }
+        if (fullName.isEmpty() || email.isEmpty() || phone.isEmpty() || address.isEmpty()) {
+            AlertHelper.showWarning(VALIDATION_ERROR, "All member fields are required.");
             return;
         }
 
-        Member updated = new Member(target.getMemberCode(), fullName, email, phone, address);
-
         try {
-            libraryService.updateMember(updated);
-            AlertHelper.showInfo("Success", "Member details updated successfully.");
-            loadMembers();
-            clearSelection();
+            MemberDTO updatedDto = new MemberDTO(memberId, fullName, email, phone, address);
+            libraryService.updateMember(updatedDto);
+            AlertHelper.showInfo("Success", "Member updated successfully.");
+            btnResetSelectionOnAction();
         } catch (SQLException e) {
             AlertHelper.showError(DATABASE_ERROR, "Failed to update member: " + e.getMessage());
         }
@@ -203,35 +152,26 @@ public class ManageMemberPageController {
 
     @FXML
     void btnDeleteMemberOnAction() {
-        Member target = resolveSelectedMember();
-        if (target == null) {
-            AlertHelper.showWarning("No Selection", "Please select a member from the table to delete.");
+        String memberId = getTrimmedText(txtMemberId);
+        if (memberId.isEmpty()) {
+            AlertHelper.showWarning(VALIDATION_ERROR, "Please select a member to delete.");
             return;
         }
 
-        boolean confirmed = AlertHelper.showConfirmation("Confirm Delete",
-                "Are you sure you want to delete member '" + target.getFullName() + "'?");
-        if (!confirmed) {
+        if (!AlertHelper.showConfirmation("Confirm Delete", "Are you sure you want to delete member " + memberId + "?")) {
             return;
         }
 
         try {
-            libraryService.deleteMember(target.getMemberCode());
-            AlertHelper.showInfo("Success", "Member deleted successfully.");
-            loadMembers();
-            clearSelection();
+            libraryService.deleteMember(memberId);
+            AlertHelper.showInfo("Deleted", "Member removed successfully.");
+            btnResetSelectionOnAction();
         } catch (SQLException e) {
-            AlertHelper.showError(DATABASE_ERROR, "Failed to delete member: " + e.getMessage());
+            AlertHelper.showError(DATABASE_ERROR, "Cannot delete member (active or historical borrow records exist): " + e.getMessage());
         }
     }
 
-    @FXML
-    void btnResetSelectionOnAction() {
-        clearSelection();
-        loadMembers();
-    }
-
-    private void clearTextFields() {
+    private void clearForm() {
         TextField[] fields = {txtMemberId, txtFullName, txtEmail, txtPhone, txtAddress};
         for (TextField field : fields) {
             if (field != null) {
@@ -240,14 +180,16 @@ public class ManageMemberPageController {
         }
     }
 
-    private void clearSelection() {
-        selectedMember = null;
-        if (tblMembers != null) {
-            tblMembers.getSelectionModel().clearSelection();
+    private void setText(TextField field, String value) {
+        if (field != null) {
+            field.setText(value != null ? value : "");
         }
-        clearTextFields();
-        if (txtMemberId != null) {
-            txtMemberId.setEditable(true);
+    }
+
+    private String getTrimmedText(TextField field) {
+        if (field == null || field.getText() == null) {
+            return "";
         }
+        return field.getText().trim();
     }
 }

@@ -1,5 +1,6 @@
 package controllers;
 
+import dto.BorrowRecordDTO;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -8,7 +9,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import model.BorrowRecord;
 import service.LibraryService;
 
 import java.sql.SQLException;
@@ -24,7 +24,7 @@ public class ReturnBookPageController {
     private static final long DAILY_FINE_RATE = 50L;
 
     private final LibraryService libraryService = new LibraryService();
-    private final ObservableList<BorrowRecord> activeRecords = FXCollections.observableArrayList();
+    private final ObservableList<BorrowRecordDTO> activeRecords = FXCollections.observableArrayList();
 
     @FXML
     private TextField txtSearchRecord;
@@ -36,27 +36,27 @@ public class ReturnBookPageController {
     private Label lblFineAmount;
 
     @FXML
-    private TableView<BorrowRecord> tblActiveBorrows;
+    private TableView<BorrowRecordDTO> tblActiveBorrows;
 
     @FXML
-    private TableColumn<BorrowRecord, Integer> colRecordId;
+    private TableColumn<BorrowRecordDTO, Integer> colRecordId;
 
     @FXML
-    private TableColumn<BorrowRecord, String> colMemberId;
+    private TableColumn<BorrowRecordDTO, String> colMemberId;
 
     @FXML
-    private TableColumn<BorrowRecord, String> colBookId;
+    private TableColumn<BorrowRecordDTO, String> colBookId;
 
     @FXML
-    private TableColumn<BorrowRecord, LocalDate> colIssueDate;
+    private TableColumn<BorrowRecordDTO, LocalDate> colIssueDate;
 
     @FXML
-    private TableColumn<BorrowRecord, LocalDate> colDueDate;
+    private TableColumn<BorrowRecordDTO, LocalDate> colDueDate;
 
     @FXML
-    private TableColumn<BorrowRecord, String> colStatus;
+    private TableColumn<BorrowRecordDTO, String> colStatus;
 
-    private BorrowRecord selectedRecord;
+    private BorrowRecordDTO selectedRecord;
 
     @FXML
     public void initialize() {
@@ -71,7 +71,7 @@ public class ReturnBookPageController {
         }
     }
 
-    private <T> void bindColumn(TableColumn<BorrowRecord, T> column, String propertyName) {
+    private <T> void bindColumn(TableColumn<BorrowRecordDTO, T> column, String propertyName) {
         if (column != null) {
             column.setCellValueFactory(new PropertyValueFactory<>(propertyName));
         }
@@ -92,7 +92,7 @@ public class ReturnBookPageController {
 
     private void loadActiveRecords(String keyword) {
         try {
-            List<BorrowRecord> records = keyword.isEmpty()
+            List<BorrowRecordDTO> records = keyword.isEmpty()
                     ? libraryService.getActiveBorrowRecords()
                     : libraryService.searchActiveBorrowRecords(keyword);
             activeRecords.setAll(records);
@@ -101,8 +101,8 @@ public class ReturnBookPageController {
         }
     }
 
-    private void updateSelectionSummary(BorrowRecord borrowRecord) {
-        if (borrowRecord == null) {
+    private void updateSelectionSummary(BorrowRecordDTO recordDto) {
+        if (recordDto == null) {
             if (lblSelectedInfo != null) {
                 lblSelectedInfo.setText("No borrow record selected");
             }
@@ -113,10 +113,10 @@ public class ReturnBookPageController {
         }
 
         if (lblSelectedInfo != null) {
-            lblSelectedInfo.setText("Member: " + borrowRecord.getMemberCode() + " | Book: " + borrowRecord.getBookCode());
+            lblSelectedInfo.setText("Member: " + recordDto.getMemberCode() + " | Book: " + recordDto.getBookCode());
         }
 
-        long fine = calculateFine(borrowRecord.getDueDate());
+        long fine = calculateFine(recordDto.getDueDate());
         if (lblFineAmount != null) {
             lblFineAmount.setText("Fine: LKR " + fine + ".00");
         }
@@ -134,7 +134,7 @@ public class ReturnBookPageController {
         return overdueDays * DAILY_FINE_RATE;
     }
 
-    private BorrowRecord resolveSelectedRecord() {
+    private BorrowRecordDTO resolveSelectedRecord() {
         if (selectedRecord != null) {
             return selectedRecord;
         }
@@ -164,7 +164,7 @@ public class ReturnBookPageController {
 
     @FXML
     void btnReturnBookOnAction() {
-        BorrowRecord target = resolveSelectedRecord();
+        BorrowRecordDTO target = resolveSelectedRecord();
         if (target == null) {
             AlertHelper.showWarning(NO_SELECTION_TITLE, "Please select a borrowed record to return.");
             return;
